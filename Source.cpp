@@ -6,40 +6,49 @@
 using namespace cv;
 using namespace std;
 
-/**  @function main */
-int main(int argc, char** argv)
+int equalize()
 {
-	Mat src, dst;
+	Mat input, output, temp;
+	vector<Mat> channels;
+	
 
-	argc = 2;
-	argv[1] = "1.jpg";
-	char* source_window = "Source image";
-	char* equalized_window = "Equalized Image";
+	char* source_window = "Obraz wejsciowy";
+	char* equalized_window = "Obraz przetworzony";
 
-	/// Load image
-	src = imread(argv[1], 1);
+	// ladowanie obrazu
+	input = imread("1.jpg", 1);
 
-	if (!src.data)
+	if (!input.data)
 	{
 		cout << "Usage: ./Histogram_Demo <path_to_image>" << endl;
 		return -1;
 	}
 
-	/// Convert to grayscale
-	cvtColor(src, src, CV_BGR2GRAY);
+	// konwersja na format Y Cr Cb z obrazu input do temp
+	cvtColor(input, temp, CV_BGR2YCrCb);
 
-	/// Apply Histogram Equalization
-	equalizeHist(src, dst);
+	// rozdzielanie obrazu temp na kanaly Y Cr Cb
+	split(temp, channels);
 
-	/// Display results
+	// wyrownanie pierwszego kanalu (Y) odpowiedzialnego za jasnosc
+	equalizeHist(channels[0], channels[0]);
+
+	// zlozenie kanalow na powrot do obrazu output
+	merge(channels, temp);
+	cvtColor(temp, output, CV_YCrCb2BGR);
+	// wyswietlanie wynikow
 	namedWindow(source_window, CV_WINDOW_AUTOSIZE);
 	namedWindow(equalized_window, CV_WINDOW_AUTOSIZE);
 
-	imshow(source_window, src);
-	imshow(equalized_window, dst);
+	imshow(source_window, input);
+	imshow(equalized_window, output);
 
 	/// Wait until user exits the program
 	waitKey(0);
-
 	return 0;
+}
+
+int main()
+{
+	equalize();
 }
