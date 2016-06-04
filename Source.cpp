@@ -23,11 +23,12 @@ int equalize()
 	// ladowanie obrazow do wektora
 	input.push_back(imread("1.jpg", 1));
 	input.push_back(imread("2.jpg", 1));
-	int n = 2; //iloœæ wczytanych obrazow
+	input.push_back(imread("3.jpg", 1));
+	int n = 3; //iloœæ wczytanych obrazow
 
-	if (!input[1].data)
+	if (!input[0].data)
 	{
-		cout << "Usage: ./Histogram_Demo <path_to_image>" << endl;
+		cout << "blad: brak obrazow" << endl;
 		return -1;
 	}
 
@@ -37,7 +38,7 @@ int equalize()
 	
 	sklejanie1 = sklejanie(input, n); //wywo³anie funkcji ³¹cz¹cej obrazy
 
-	for (int i = 0;i <input.size() ;i++)
+	for (int i = 0; i < input.size(); i++)
 	{
 	// konwersja na format Y Cr Cb z obrazu input do temp
 	cvtColor(input[i], temp, CV_BGR2YCrCb);
@@ -59,11 +60,6 @@ int equalize()
 	sklejanie2 = sklejanie(output, n);
 
 	//// wyswietlanie wynikow
-	//namedWindow(source_window, CV_WINDOW_AUTOSIZE);
-	//namedWindow(equalized_window, CV_WINDOW_AUTOSIZE);
-
-	//imshow(source_window, input);
-	//imshow(equalized_window, output);
 	imshow(Sklejanie_przed_window, sklejanie1);
 	imshow(Sklejanie_po_window, sklejanie2);
 
@@ -77,7 +73,7 @@ Mat sklejanie(vector<Mat> in, int n) //in-wektor obrazów, n-iloœæ wczytanych obr
 {
 	//okreœlenie iloœci wierszy i kolumn
 	int wie = 1;
-	int kol = 2;
+	int kol = 3;
 	//obliczenie szerokoœci i wysokoœci poszczegulnych miniaturek na podztawie iliœci wierszy i kolumn
 	int s = 600. / kol;
 	int w = 0.75*s;
