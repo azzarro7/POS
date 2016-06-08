@@ -16,30 +16,38 @@ using namespace cppiniparser;
 *****W PODAWANIU SCIEZEK DO PLIKU INI MUSZA BYC ZNAKI "slash" a nie "backslash", BO TAKI JEST VISUAL, ALE W SAMYM PLIKU INI W MOZNA PODAC SOBIE SCIEZKE Z slash
 */
 
-int i = 0, ileSciezek = 0;
-string sciezki[999];
-char takenstring[100];
+vector<Mat> input;
+vector<Mat> output;
+Mat sklejanie1; //sklejenie obrazow przed przetwarzaniem
+Mat sklejanie2; //sklejenie obrazów po przetwarzaniu
+char* Sklejanie_przed_window = "Sklejanie_przed";
+char* Sklejanie_po_window = "Sklejanie_po";
+
+int n = 0; //iloœæ wczytanych obrazow
 
 //funkcja zwraca tablice ze sciezkami+liczbe sciezek
-int wczytajSciezkiZini()
+void wczytaj()
 {
-	ileSciezek = 0;
+
+	char sciezka[100];
+
 	//parsuje z pliku ini sciezki
-	for (i = 0; i <= 999; i++)
+	for (int i = 0; i <= 999; i++)
 	{
 		std::string filename = "img" + std::to_string(i);	//potrzebne zeby zrobic img1, img2....
-		GetPrivateProfileString(TEXT("images"), TEXT(filename.c_str()), TEXT("0"), takenstring, 100, TEXT("../images.ini"));	//w sekcji images szuka img1, img2... jezeli nie znajdzie np. img11 to wypisze "0"
-																															//plik ini moze byc zapisany jako zwykle ANSI txt, w podawaniu sciezek do pliku ini musza byc znaki "slash" a nie "backslash"
+		GetPrivateProfileString(TEXT("images"), TEXT(filename.c_str()), TEXT("0"), sciezka, 100, TEXT("../images.ini"));
 
-																															//w takenstring jest zapisana dana sciezka, tzn kazdy znak jako char, wiec musze zapisac to jako pojedynczy string, a potem zrobic tablice tych stringow	
-																															//jezeli wystapilo zero (brak sciezki w pliku ini) to nie wpisuj go do tablicy
-		if (*takenstring != '0')
+		//w sekcji images szuka img1, img2... jezeli nie znajdzie np. img11 to wypisze "0"
+		//plik ini moze byc zapisany jako zwykle ANSI txt, w podawaniu sciezek do pliku ini musza byc znaki "slash" a nie "backslash"
+		//w takenstring jest zapisana dana sciezka, tzn kazdy znak jako char, wiec musze zapisac to jako pojedynczy string, a potem zrobic tablice tych stringow	
+		//jezeli wystapilo zero (brak sciezki w pliku ini) to nie wpisuj go do tablicy
+
+		if (*sciezka != '0')
 		{
-			sciezki[i] = takenstring;
-			ileSciezek++;
+			input.push_back(imread(sciezka, 1));
+			n++;
 		}
 	}
-	return sciezki, ileSciezek;
 }
 
 
@@ -49,19 +57,6 @@ int equalize()
 {
 	Mat temp, temp1; //temp1 - tymczasowa zmienna przechowuj¹ca obraz wyjœciowy;
 	vector<Mat> channels;
-	vector<Mat> input;
-	vector<Mat> output;
-
-	char* source_window = "Obraz wejsciowy";
-	char* equalized_window = "Obraz przetworzony";
-	char* Sklejanie_przed_window = "Sklejanie_przed";
-	char* Sklejanie_po_window = "Sklejanie_po";
-
-	// ladowanie obrazow do wektora
-	input.push_back(imread("../1.jpg", 1));
-	input.push_back(imread("../2.jpg", 1));
-	input.push_back(imread("../3.jpg", 1));
-	int n = 3; //iloœæ wczytanych obrazow
 
 	if (!input[0].data)
 	{
@@ -69,11 +64,6 @@ int equalize()
 		return -1;
 	}
 
-	Mat sklejanie1; //sklejenie obrazow przed przetwarzaniem
-	Mat sklejanie2; //sklejenie obrazów po przetwarzaniu
-
-	
-	sklejanie1 = sklejanie(input, n); //wywo³anie funkcji ³¹cz¹cej obrazy
 
 	for (int i = 0; i < input.size(); i++)
 	{
@@ -94,15 +84,6 @@ int equalize()
 
 	}
 
-	sklejanie2 = sklejanie(output, n);
-
-	//// wyswietlanie wynikow
-	imshow(Sklejanie_przed_window, sklejanie1);
-	imshow(Sklejanie_po_window, sklejanie2);
-
-
-	/// Wait until user exits the program
-	waitKey(0);
 	return 0;
 }
 
@@ -117,11 +98,13 @@ Mat sklejanie(vector<Mat> in, int n) //in-wektor obrazów, n-iloœæ wczytanych obr
 
 	Mat sklej(wie*w, kol*s, CV_8UC3, CV_RGB(0, 0, 0)); //pusty obraz z czarnym t³em do sklejenia obrazow
 
-	for (int i = 0;i<in.size();i++) //pêtla sklejaj¹ca ze sob¹ miniaturki obrazów
+	for (int i = 0; i<in.size(); i++) //pêtla sklejaj¹ca ze sob¹ miniaturki obrazów
 	{
+
 		//okreœlenie kolejnych punktów od których bêd¹ wstawiane miniaturki
 		int x = i%kol*s;
 		int y = i / kol*w;
+
 		//tworzenie miniaturek i sklejanie ich ze sob¹
 		Mat roi = sklej(Rect(x, y, s, w));
 		resize(in[i], roi, roi.size());
@@ -131,16 +114,17 @@ Mat sklejanie(vector<Mat> in, int n) //in-wektor obrazów, n-iloœæ wczytanych obr
 
 int main(int argc, char* argv[])
 {
-	wczytajSciezkiZini();	//funkcja zwraca tablice ze sciezkami+liczbe sciezek
-							//wypisuje sciezki w konsoli jako sprawdzenie 
-	for (i = 0; i < ileSciezek; i++)
-	{
-		printf(TEXT("%s\n"), sciezki[i].c_str());
-	}
+	wczytaj();	//funkcja zwraca tablice ze sciezkami+liczbe sciezek
 
-	//printf("liczba sciezek=%d",ileSciezek);
-	//	cout << "Section: " << takenstring << endl;
 	equalize();
-	getchar();
+
+	sklejanie1 = sklejanie(input, n); //wywo³anie funkcji ³¹cz¹cej obrazy
+	sklejanie2 = sklejanie(output, n);
+	//// wyswietlanie wynikow
+
+	imshow(Sklejanie_przed_window, sklejanie1);
+	imshow(Sklejanie_po_window, sklejanie2);
+	waitKey(0);
+
 	return 0;
 }
