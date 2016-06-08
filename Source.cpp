@@ -2,9 +2,46 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
 #include <stdio.h>
-
+#include "./INIParser.h"
+#include "conio.h"
+#include <windows.h>
+#include "string.h"
 using namespace cv;
 using namespace std;
+using namespace cppiniparser;
+
+/*
+*****JAK CHCECIE ODPALIC Z DYSKU PROGAM iniparse.exe TO: .\pos_iniparse_2.06\iniparse\Debug     I W TYM FOLDERZE MUSI BYC PLIK images.ini   MOZE ON BYC ZAPISANY JAKO NORMALNY TXT W ANSI
+*****JAK CHCECIE DEUBUGOWAC TO PLIK images.ini MUSI BYC W: .\pos_iniparse_2.06\iniparse\iniparse
+*****W PODAWANIU SCIEZEK DO PLIKU INI MUSZA BYC ZNAKI "slash" a nie "backslash", BO TAKI JEST VISUAL, ALE W SAMYM PLIKU INI W MOZNA PODAC SOBIE SCIEZKE Z slash
+*/
+
+int i = 0, ileSciezek = 0;
+string sciezki[999];
+char takenstring[100];
+
+//funkcja zwraca tablice ze sciezkami+liczbe sciezek
+int wczytajSciezkiZini()
+{
+	ileSciezek = 0;
+	//parsuje z pliku ini sciezki
+	for (i = 0; i <= 999; i++)
+	{
+		std::string filename = "img" + std::to_string(i);	//potrzebne zeby zrobic img1, img2....
+		GetPrivateProfileString(TEXT("images"), TEXT(filename.c_str()), TEXT("0"), takenstring, 100, TEXT("../images.ini"));	//w sekcji images szuka img1, img2... jezeli nie znajdzie np. img11 to wypisze "0"
+																															//plik ini moze byc zapisany jako zwykle ANSI txt, w podawaniu sciezek do pliku ini musza byc znaki "slash" a nie "backslash"
+
+																															//w takenstring jest zapisana dana sciezka, tzn kazdy znak jako char, wiec musze zapisac to jako pojedynczy string, a potem zrobic tablice tych stringow	
+																															//jezeli wystapilo zero (brak sciezki w pliku ini) to nie wpisuj go do tablicy
+		if (*takenstring != '0')
+		{
+			sciezki[i] = takenstring;
+			ileSciezek++;
+		}
+	}
+	return sciezki, ileSciezek;
+}
+
 
 Mat sklejanie(vector<Mat> in, int n);
 
@@ -21,9 +58,9 @@ int equalize()
 	char* Sklejanie_po_window = "Sklejanie_po";
 
 	// ladowanie obrazow do wektora
-	input.push_back(imread("1.jpg", 1));
-	input.push_back(imread("2.jpg", 1));
-	input.push_back(imread("3.jpg", 1));
+	input.push_back(imread("../1.jpg", 1));
+	input.push_back(imread("../2.jpg", 1));
+	input.push_back(imread("../3.jpg", 1));
 	int n = 3; //iloœæ wczytanych obrazow
 
 	if (!input[0].data)
@@ -92,7 +129,18 @@ Mat sklejanie(vector<Mat> in, int n) //in-wektor obrazów, n-iloœæ wczytanych obr
 	return sklej;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+	wczytajSciezkiZini();	//funkcja zwraca tablice ze sciezkami+liczbe sciezek
+							//wypisuje sciezki w konsoli jako sprawdzenie 
+	for (i = 0; i < ileSciezek; i++)
+	{
+		printf(TEXT("%s\n"), sciezki[i].c_str());
+	}
+
+	//printf("liczba sciezek=%d",ileSciezek);
+	//	cout << "Section: " << takenstring << endl;
 	equalize();
+	getchar();
+	return 0;
 }
