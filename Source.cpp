@@ -6,6 +6,7 @@
 #include "conio.h"
 #include <windows.h>
 #include "string.h"
+#include <cmath>
 using namespace cv;
 using namespace std;
 using namespace cppiniparser;
@@ -89,10 +90,10 @@ int equalize()
 
 Mat sklejanie(vector<Mat> in, int n) //in-wektor obrazów, n-iloœæ wczytanych obrazów
 {
-	//okreœlenie iloœci wierszy i kolumn
-	int wie = 1;
-	int kol = 3;
-	//obliczenie szerokoœci i wysokoœci poszczegulnych miniaturek na podztawie iliœci wierszy i kolumn
+	//okreœlenie iloœci wierszy i kolumn na podstawie liczby wczytywanych obrazów
+	int wie = ceil((double)n/2);
+	int kol = ceil((double)n/wie);
+	//obliczenie szerokoœci i wysokoœci poszczegulnych miniaturek na podztawie liczby wierszy i kolumn
 	int s = 600. / kol;
 	int w = 0.75*s;
 
