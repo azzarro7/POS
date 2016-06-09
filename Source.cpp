@@ -52,8 +52,6 @@ void wczytaj()
 }
 
 
-Mat sklejanie(vector<Mat> in, int n);
-
 int equalize()
 {
 	Mat temp, temp1; //temp1 - tymczasowa zmienna przechowuj¹ca obraz wyjœciowy;
@@ -82,7 +80,6 @@ int equalize()
 	cvtColor(temp, temp1, CV_YCrCb2BGR);
 
 	output.push_back(temp1); //wpisanie przetworzonego obrazu do wektora output
-
 	}
 
 	return 0;
@@ -113,6 +110,28 @@ Mat sklejanie(vector<Mat> in, int n) //in-wektor obrazów, n-iloœæ wczytanych obr
 	return sklej;
 }
 
+int save()
+{
+	char saveDir[999];
+	int bytes;
+
+	for (int i = 0; i < input.size(); i++)
+	{
+		bytes = sprintf(saveDir, "../przetworzone/img_%i_przed.jpg", i);
+		imwrite(saveDir, input[i]);
+	}
+
+	for (int i = 0; i < output.size(); i++)
+	{
+		bytes = sprintf(saveDir, "../przetworzone/img_%i_po.jpg", i);
+		imwrite(saveDir, output[i]);
+	}
+
+	imwrite("../przetworzone/przed.jpg", sklejanie1);
+	imwrite("../przetworzone/po.jpg", sklejanie2);
+	return 0;
+}
+
 int main(int argc, char* argv[])
 {
 	wczytaj();	//funkcja zwraca tablice ze sciezkami+liczbe sciezek
@@ -121,10 +140,14 @@ int main(int argc, char* argv[])
 
 	sklejanie1 = sklejanie(input, n); //wywo³anie funkcji ³¹cz¹cej obrazy
 	sklejanie2 = sklejanie(output, n);
-	//// wyswietlanie wynikow
 
+	//// wyswietlanie wynikow
 	imshow(Sklejanie_przed_window, sklejanie1);
 	imshow(Sklejanie_po_window, sklejanie2);
+
+	//zapisywanie wynikow
+	save();
+
 	waitKey(0);
 
 	return 0;
