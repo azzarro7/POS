@@ -90,7 +90,7 @@ Mat sklejanie(vector<Mat> in, int n) //in-wektor obrazów, n-iloœæ wczytanych obr
 	//okreœlenie iloœci wierszy i kolumn na podstawie liczby wczytywanych obrazów
 	int wie = ceil((double)n/2);
 	int kol = ceil((double)n/wie);
-	//obliczenie szerokoœci i wysokoœci poszczegulnych miniaturek na podztawie liczby wierszy i kolumn
+	//obliczenie szerokoœci i wysokoœci poszczegolnych miniaturek na podstawie liczby wierszy i kolumn
 	int s = 600. / kol;
 	int w = 0.75*s;
 
@@ -98,7 +98,6 @@ Mat sklejanie(vector<Mat> in, int n) //in-wektor obrazów, n-iloœæ wczytanych obr
 
 	for (int i = 0; i<in.size(); i++) //pêtla sklejaj¹ca ze sob¹ miniaturki obrazów
 	{
-
 		//okreœlenie kolejnych punktów od których bêd¹ wstawiane miniaturki
 		int x = i%kol*s;
 		int y = i / kol*w;
