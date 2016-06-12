@@ -82,28 +82,44 @@ int equalize()
 	return 0;
 }
 
-Mat sklejanie(vector<Mat> in, int n) //in-wektor obrazów, n-iloœæ wczytanych obrazów
+Mat sklejanie(vector<Mat> in, int n) /// \param in wektor obrazów, n iloœæ wczytanych obrazów
 {
-	//okreœlenie iloœci wierszy i kolumn na podstawie liczby wczytywanych obrazów
-	int wie = ceil((double)n/2);
-	int kol = ceil((double)n/wie);
-	//obliczenie szerokoœci i wysokoœci poszczegolnych miniaturek na podstawie liczby wierszy i kolumn
-	int s = 600. / kol;
-	int w = 0.75*s;
+	/// \brief okreœlenie iloœci wierszy i kolumn na podstawie liczby wczytywanych obrazów
+	int wie = ceil((double)n / 3); /// \param wie iloœæ wierszy
+	int kol = ceil((double)n / wie); /// \param kol iloœc kolumn
 
-	Mat sklej(wie*w, kol*s, CV_8UC3, CV_RGB(0, 0, 0)); //pusty obraz z czarnym t³em do sklejenia obrazow
+	std::vector<float> w; /// \param w wektor wysokoœci obrazów wejœciowych
+	std::vector<int> w1; /// \param w1 wektor wysokoœci miniaturek
+	std::vector<float> s; /// \param s wektor szerokoœci obrazów wejœciowych
+	std::vector<float> ratio; /// \param ratio wektor szerokoœci obrazów wejœciowych
+	int w_max = 0;/// \param w_max maksymalna wysokoœæ
 
-	for (int i = 0; i<in.size(); i++) //pêtla sklejaj¹ca ze sob¹ miniaturki obrazów
+	/// \brief obliczenie szerokoœci i wysokoœci poszczegulnych miniaturek
+	int s1 = 500. / kol;
+	for (int i = 0; i < in.size(); i++)
 	{
-		//okreœlenie kolejnych punktów od których bêd¹ wstawiane miniaturki
-		int x = i%kol*s;
-		int y = i / kol*w;
+		w.push_back(in[i].cols);
+		s.push_back(in[i].rows);
+		ratio.push_back(s[i] / w[i]);
+		w1.push_back(s1*ratio[i]);
+		if (w1[i] > w_max) w_max = w1[i];
+	}
 
-		//tworzenie miniaturek i sklejanie ich ze sob¹
-		Mat roi = sklej(Rect(x, y, s, w));
+	Mat sklej(wie*w_max, kol*s1, CV_8UC3, CV_RGB(0, 0, 0)); /// \param  sklej pusty obraz z czarnym t³em do sklejenia obrazow
+
+															/// \brief pêtla sklejaj¹ca ze sob¹ miniaturki obrazów
+	for (int i = 0; i<in.size(); i++)
+	{
+
+		/// \brief okreœlenie kolejnych punktów od których bêd¹ wstawiane miniaturki
+		int x = i%kol*s1;
+		int y = i / kol*w_max;
+
+		/// \brief tworzenie miniaturek i sklejanie ich ze sob¹
+		Mat roi = sklej(Rect(x, y, s1, w1[i]));
 		resize(in[i], roi, roi.size());
 	}
-	return sklej;
+	return sklej; /// \return mozajka sklejonych obrazków
 }
 
 int save()
