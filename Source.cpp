@@ -11,12 +11,6 @@ using namespace cv;
 using namespace std;
 using namespace cppiniparser;
 
-/*
-*****JAK CHCECIE ODPALIC Z DYSKU PROGAM iniparse.exe TO: .\pos_iniparse_2.06\iniparse\Debug     I W TYM FOLDERZE MUSI BYC PLIK images.ini   MOZE ON BYC ZAPISANY JAKO NORMALNY TXT W ANSI
-*****JAK CHCECIE DEUBUGOWAC TO PLIK images.ini MUSI BYC W: .\pos_iniparse_2.06\iniparse\iniparse
-*****W PODAWANIU SCIEZEK DO PLIKU INI MUSZA BYC ZNAKI "slash" a nie "backslash", BO TAKI JEST VISUAL, ALE W SAMYM PLIKU INI W MOZNA PODAC SOBIE SCIEZKE Z slash
-*/
-
 vector<Mat> input;
 vector<Mat> output;
 Mat sklejanie1; //sklejenie obrazow przed przetwarzaniem
@@ -24,31 +18,34 @@ Mat sklejanie2; //sklejenie obrazów po przetwarzaniu
 char* Sklejanie_przed_window = "Sklejanie_przed";
 char* Sklejanie_po_window = "Sklejanie_po";
 
-int n = 0; //iloœæ wczytanych obrazow
+int n = 0; ///iloœæ wczytanych obrazow
 
-//funkcja zwraca tablice ze sciezkami+liczbe sciezek
+char path_of_converted_imgs[100];	///zmienna, ktora przechowuje adres folderu w ktorym beda zapisane obrazy po przetworzeniu
+
+/**
+	\brief		funkcja zwraca tablice ze sciezkami, liczbe sciezek i adres folderu w ktorym beda zapisane obrazy po przetworzeniu
+	\details	parsuje z pliku ini sciezki, plik ini moze byc zapisany jako zwykle ANSI txt, w podawaniu sciezek do pliku ini musza byc znaki "slash" a nie "backslash" czyli np. "../images.ini"
+**/
 void wczytaj()
 {
-
-	char sciezka[100];
-
-	//parsuje z pliku ini sciezki
+	char sciezka[100];	///zmienna w ktorej jest przechowywana dana jedna odczytana sciezka
 	for (int i = 0; i <= 999; i++)
 	{
-		std::string filename = "img" + std::to_string(i);	//potrzebne zeby zrobic img1, img2....
-		GetPrivateProfileString(TEXT("images"), TEXT(filename.c_str()), TEXT("0"), sciezka, 100, TEXT("../images.ini"));
+		std::string filename = "img" + std::to_string(i);	///potrzebne zeby zrobic img1, img2....
+		GetPrivateProfileString(TEXT("images"), TEXT(filename.c_str()), TEXT("0"), sciezka, 100, TEXT("../images.ini"));	/// w sekcji [images] szuka sciezek img1, img2... je¿eli nie znajdzie juz wiecej "img" to zacznie zwracac zera
 
-		//w sekcji images szuka img1, img2... jezeli nie znajdzie np. img11 to wypisze "0"
-		//plik ini moze byc zapisany jako zwykle ANSI txt, w podawaniu sciezek do pliku ini musza byc znaki "slash" a nie "backslash"
-		//w takenstring jest zapisana dana sciezka, tzn kazdy znak jako char, wiec musze zapisac to jako pojedynczy string, a potem zrobic tablice tych stringow	
-		//jezeli wystapilo zero (brak sciezki w pliku ini) to nie wpisuj go do tablicy
-
-		if (*sciezka != '0')
+		///jezeli nie znajdzie juz wiecej sciezek to wypisze "0", a jak napotka "0" to nie wpisze go do tablicy
+		if (*sciezka != '0')	///jezeli wystapilo zero (brak sciezki w pliku ini) to nie wpisuj go do tablicy
 		{
-			input.push_back(imread(sciezka, 1));
-			n++;
+			input.push_back(imread(sciezka, 1));	///zapisuje do input pobrane sciezki z pliku ini, tworzy tablice sciezek
+			n++;	///iloœæ wczytanych obrazow
 		}
 	}
+	
+	GetPrivateProfileString(TEXT("converted_imgs"), TEXT("path"), TEXT("0"), path_of_converted_imgs, 100, TEXT("./images.ini"));	///do zmiennej path_of_converted_imgs przypisuje adres folderu w ktorym beda zapisane obrazy po przetworzeniu
+	//printf(TEXT("%s\n"), path_of_converted_imgs);	///a to jest do wyswietlania sciezki folderu
+	
+	/// \return zwraca tablice ze sciezkami oraz adres folderu w ktorym beda zapisane obrazy po przetworzeniu
 }
 
 
@@ -133,7 +130,7 @@ int save()
 
 int main(int argc, char* argv[])
 {
-	wczytaj();	//funkcja zwraca tablice ze sciezkami+liczbe sciezek
+	wczytaj();	///funkcja zwraca tablice ze sciezkami, liczbe sciezek i adres folderu w ktorym beda zapisane obrazy po przetworzeniu
 
 	equalize();
 
